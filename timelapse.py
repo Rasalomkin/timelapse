@@ -24,7 +24,7 @@ def main():
     parser.add_argument("--photo_prefix", type=str, default="timelapse_", help="Prefix for the photo filenames")
     args = parser.parse_args()
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(-1, cv2.CAP_V4L)
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, args.width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
@@ -60,7 +60,11 @@ def main():
 
         if photo_interval != 0 and time.time() - start_time >= photo_interval:
             photo_filename = os.path.join(args.photo_dir, f"{args.photo_prefix}{int(time.time())}{photo_ext}")
-            cv2.imwrite(photo_filename, frame)
+            try:
+                cv2.imwrite(photo_filename, frame)
+            except Exception as e:
+                print(f"Error while writing to file: {e}")
+                continue
 
             # Check if the device is out of memory
             free_bytes = os.statvfs(args.photo_dir).f_frsize * os.statvfs(args.photo_dir).f_bavail

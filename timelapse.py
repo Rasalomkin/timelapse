@@ -9,7 +9,6 @@ def main():
     Args:
         --width (int): Width of the video capture in pixels (default: 640).
         --height (int): Height of the video capture in pixels (default: 480).
-        --duration (int): Duration of the video in seconds (default: 86400).
         --interval (int): Interval for taking photos in seconds. Set to 0 to disable photo capture (default: 60).
         --photo_dir (str): Directory for storing photos (default: /home/pi/photos).
         --photo_prefix (str): Prefix for the photo filenames (default: timelapse_).
@@ -18,7 +17,6 @@ def main():
     parser = argparse.ArgumentParser(description="Capture video from the Raspberry Pi camera module and optionally create a timelapse of photos.")
     parser.add_argument("--width", type=int, default=1920, help="Width of the video capture in pixels")
     parser.add_argument("--height", type=int, default=1080, help="Height of the video capture in pixels")
-    parser.add_argument("--duration", type=int, default=86400, help="Duration of the video in seconds")
     parser.add_argument("--interval", type=int, default=60, help="Interval for taking photos in seconds. Set to 0 to disable photo capture.")
     parser.add_argument("--photo_dir", type=str, default="/home/pi/photos", help="Directory for storing photos")
     parser.add_argument("--photo_prefix", type=str, default="timelapse_", help="Prefix for the photo filenames")
@@ -34,14 +32,11 @@ def main():
         return
 
     fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-    video_out = cv2.VideoWriter("video.avi", fourcc, 30.0, (args.width, args.height))
 
     if args.interval != 0 and not os.path.exists(args.photo_dir):
         os.makedirs(args.photo_dir)
 
     photo_interval = args.interval
-
-    video_duration = args.duration
 
     start_time = time.time()
 
@@ -57,9 +52,8 @@ def main():
                 time.sleep(60)
                 continue
 
-            video_out.write(frame)
-
             if photo_interval != 0 and time.time() - start_time >= photo_interval:
+                time.sleep(photo_intervalq)
                 photo_filename = os.path.join(args.photo_dir, f"{args.photo_prefix}{int(time.time())}{photo_ext}")
                 try:
                     cv2.imwrite(photo_filename, frame)
@@ -76,14 +70,10 @@ def main():
 
                 start_time = time.time()
 
-            if time.time() - start_time >= video_duration:
-                break
-
     except KeyboardInterrupt:
             print("Keyboard interrupt detected, stopping...")
     finally:
         cap.release()
-        video_out.release()
 
 if __name__ == "__main__":
     main()

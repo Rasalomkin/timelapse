@@ -52,8 +52,9 @@ def main():
         ret, frame = cap.read()
 
         if not ret:
-            print("Unable to capture frame")
-            break
+            print("Unable to capture frame, retrying in 1 minute")
+            time.sleep(60)
+            continue
 
         video_out.write(frame)
 
